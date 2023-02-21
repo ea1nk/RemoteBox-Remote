@@ -1,7 +1,7 @@
-const SerialPort = require('serialport');
+const {SerialPort} = require('serialport');
 class RemoteBox {
   constructor(port, baudRate) {
-    this.port = new SerialPort(port, { baudRate: baudRate });
+    this.port = new SerialPort({ path:port, baudRate: baudRate });
     this.commands = {
       NAME: 'O',
       ANTENNA_STATUS: 'S',
