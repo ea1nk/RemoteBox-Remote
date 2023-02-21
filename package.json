@@ -1,0 +1,28 @@
+{
+  "name": "webremotebox",
+  "version": "1.0.0",
+  "description": "EA4TX Remotebox Web Interface",
+  "main": "server.js",
+  "dependencies": {
+    "serialport": "^10.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ea1nk/RemoteBox.git"
+  },
+  "keywords": [
+    "EA4TX",
+    "Remotebox",
+    "EA1NK"
+  ],
+  "author": "Juan J. Lamas - EA1NK",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ea1nk/RemoteBox/issues"
+  },
+  "homepage": "https://github.com/ea1nk/RemoteBox#readme"
+}
