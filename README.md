@@ -1,2 +1,2 @@
 # RemoteBox
-EA4TX RemoteBox Web Intrface
+EA4TX RemoteBox Web Interface
