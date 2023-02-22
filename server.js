@@ -22,6 +22,11 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
+  
+  socket.on('get-status', () => {
+    socket.emit('status', controller.getAntennaStatus());
+  });
+  
 });
 
 server.listen(3001, () => {
