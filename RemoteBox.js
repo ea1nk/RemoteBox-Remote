@@ -1,76 +1,61 @@
 const {SerialPort} = require('serialport');
+const {Readline} = require('@serialport/parser-readline');
+
 class RemoteBox {
   constructor(port, baudRate) {
     this.port = new SerialPort({ path:port, baudRate: baudRate });
-    this.commands = {
-      NAME: 'O',
-      ANTENNA_STATUS: 'S',
-      TRACE: 'X',
-      ANTENNA_INFO: 'FI',
-      SET_RADIO1_ANTENNA: '1R',
-      SET_RADIO2_ANTENNA: '2R'
-    };
-    this.commandCallbacks = {};
-    this.responseBuffer = '';
-    this.port.on('data', this.handleData.bind(this));
+    this.parser = this.port.pipe(new Readline({ delimiter: '\r\n' }));
   }
 
-  sendCommand(command, args, callback) {
-    const commandString = `${command}${args}\n`;
-    this.commandCallbacks[command] = callback;
-    this.port.write(commandString, (err) => {
-      if (err) {
-        console.error(`Error sending command ${commandString}: ${err.message}`);
-      }
+  async sendCommand(command) {
+    const response = await this._writeAndRead(`${command}\r\n`);
+    return response.trim();
+  }
+
+  _writeAndRead(data) {
+    return new Promise((resolve, reject) => {
+      this.port.write(data, (err) => {
+        if (err) return reject(err);
+      });
+
+      this.parser.once('data', (data) => resolve(data));
     });
   }
 
-  handleData(data) {
-    this.responseBuffer += data.toString();
-    if (this.responseBuffer.includes('\n')) {
-      const [response, ...remaining] = this.responseBuffer.split('\n');
-      this.responseBuffer = remaining.join('\n');
-      const [command, ...args] = response.trim().split(':');
-      const callback = this.commandCallbacks[command];
-      if (callback) {
-        callback(args);
-        delete this.commandCallbacks[command];
-      }
-    }
+  async getInfo() {
+    return await this.sendCommand('O');
   }
 
-  getName(callback) {
-    this.sendCommand(this.commands.NAME, '', (args) => {
-      callback(args[0]);
-    });
+  async getAntennaStatus() {
+    const response = await this.sendCommand('S');
+    return this._parseAntennaStatus(response);
   }
 
-  getAntennaStatus(callback) {
-    this.sendCommand(this.commands.ANTENNA_STATUS, '', (args) => {
-      const [antennaStatus] = args;
-      callback(antennaStatus.split(':').slice(1).map(Number));
-    });
+  async setDebugMessages(enabled) {
+    const value = enabled ? 1 : 0;
+    return await this.sendCommand(`X${value}`);
   }
 
-  setTrace(on, callback) {
-    this.sendCommand(this.commands.TRACE, on ? '1' : '0', callback);
+  async getAntennaInfo() {
+    return await this.sendCommand('FI');
   }
 
-  getAntennaInfo(callback) {
-    this.sendCommand(this.commands.ANTENNA_INFO, '', (args) => {
-      const [antennaInfo] = args;
-      callback(antennaInfo.split(':').slice(1).map(Number));
-    });
+  async setRadio1Antenna(n, on) {
+    const value = on ? 1 : 0;
+    return await this.sendCommand(`1R${n}${value}`);
   }
 
-  setRadio1Antenna(antennaNumber, on, callback) {
-    const args = `${antennaNumber}${on ? '1' : '0'}`;
-    this.sendCommand(this.commands.SET_RADIO1_ANTENNA, args, callback);
+  async setRadio2Antenna(n, on) {
+    const value = on ? 1 : 0;
+    return await this.sendCommand(`2R${n}${value}`);
   }
 
-  setRadio2Antenna(antennaNumber, on, callback) {
-    const args = `${antennaNumber}${on ? '1' : '0'}`;
-    this.sendCommand(this.commands.SET_RADIO2_ANTENNA, args, callback);
+  _parseAntennaStatus(response) {
+    const matches = response.match(/SW\d+:(\d,?)+/);
+    if (!matches) throw new Error('Invalid antenna status message');
+
+    const statuses = matches[0].split(':')[1].split(',').map((s) => parseInt(s, 10));
+    return statuses;
   }
 }
 
