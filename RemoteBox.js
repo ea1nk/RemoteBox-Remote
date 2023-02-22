@@ -53,7 +53,7 @@ class RemoteBox {
   }
 
   _parseAntennaStatus(response) {
-    const matches = response.match(/SW\d+:(\d,?)+/);
+    const matches = response.match(/(SW\d+:|lSW:)(\d,?)+/);
     if (!matches) throw new Error('Invalid antenna status message');
 
     const statuses = matches[0].split(':')[1].split(',').map((s) => parseInt(s, 10));
