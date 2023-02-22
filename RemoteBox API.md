@@ -16,6 +16,6 @@
     For one Radio models:
     ``SW1:<X,X,X,X,X,X,X,X>``
     
-    For two radio models also:
+    For two Radio models also:
     ``SW2:<X,X,X,X,X,X,X,X>``
     
