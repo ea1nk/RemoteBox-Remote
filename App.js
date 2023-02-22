@@ -19,6 +19,14 @@ function App() {
     socket.on('status', (data) => {
       setStatus(data);
     });
+    
+    const intervalId = setInterval(() => {
+      socket.emit('get-status');
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleButtonClick = (index) => {
