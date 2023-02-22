@@ -5,6 +5,7 @@ class RemoteBox {
   constructor(port, baudRate) {
     this.port = new SerialPort({ path:port, baudRate: baudRate });
     this.parser = this.port.pipe(new Readline({ delimiter: '\r\n' }));
+    this.Antennastatus = []
   }
 
   async sendCommand(command) {
@@ -28,6 +29,7 @@ class RemoteBox {
 
   async getAntennaStatus() {
     const response = await this.sendCommand('S');
+    this.Antennastatus = this._parseAntennaStatus(response);
     return this._parseAntennaStatus(response);
   }
 
