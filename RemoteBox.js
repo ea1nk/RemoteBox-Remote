@@ -71,17 +71,12 @@ class RemoteBox {
     //Todo: return this.sendCommand('FI');
   }
 
-  setRadio1Antenna(n, on) {
+  setRadioAntenna(trx, n, on) {
     const value = on ? 1 : 0;
-    return this.sendCommand(`1R${n}${value}`);
+    return this.sendCommand(`${trx}R${n}${value}`);
   }
 
-  setRadio2Antenna(n, on) {
-    const value = on ? 1 : 0;
-    return this.sendCommand(`2R${n}${value}`);
-  }
-
- _parseAntennaStatus(response) {
+  _parseAntennaStatus(response) {
   console.log(`Response ${response}`);
   try {
     const matches = response.match(/lSW\d+:<([\d,]+)>/);
