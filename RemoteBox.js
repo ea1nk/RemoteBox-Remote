@@ -42,7 +42,7 @@ class RemoteBox {
   }
 
   getInfo() {
-    return this.sendCommand('O');
+    //Todo: return this.sendCommand('O');
   }
 
   getAntennaStatus() {
@@ -62,12 +62,13 @@ class RemoteBox {
   }
 
   setDebugMessages(enabled) {
-    const value = enabled ? 1 : 0;
-    return this.sendCommand(`X${value}`);
+    //Todo
+    //const value = enabled ? 1 : 0;
+    //return this.sendCommand(`X${value}`);
   }
 
   getAntennaInfo() {
-    return this.sendCommand('FI');
+    //Todo: return this.sendCommand('FI');
   }
 
   setRadio1Antenna(n, on) {
