@@ -26,7 +26,7 @@ const RemoteBox = require('./RemoteBox')
 Create a RemoteBox instace:
 
 ```
-const RB = new RemoteBox('/dev/ttyACM0', 38400);
+const RB = new RemoteBox('/dev/ttyACM0', 38400); // Change to match your /dev/ttyX serial port
 
 ```
 Commands available:
