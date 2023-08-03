@@ -4,7 +4,7 @@ const {ReadlineParser} = require('@serialport/parser-readline');
 class RemoteBox {
   constructor(port, baudRate) {
     this.port = new SerialPort({ path:port, baudRate: baudRate });
-    this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+    this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\n' }));
     this.AntennaStatus = []
   }
 
