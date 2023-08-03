@@ -26,8 +26,9 @@ io.on('connection', (socket) => {
 
   updateAntennaStatus(socket);
 
-  socket.on('set-antenna', (index, on) => {
-    RB.setRadio1Antenna(index + 1, on)
+  socket.on('set-antenna', (trx, index, on) => {
+    
+    RB.setRadioAntenna(trx, index + 1, on)
       .then(() => {
         updateAntennaStatus(io);
       })
