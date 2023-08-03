@@ -1,32 +1,48 @@
 const RemoteBox = require('./RemoteBox');
 
-const RB = new RemoteBox('/dev/ttyACM0', 9600);
+const RB = new RemoteBox('/dev/ttyACM0', 38400);
 const http = require('http');
 const socketIo = require('socket.io');
 
 const server = http.createServer();
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost",
+    methods: ["GET", "POST"]
+  }
+});
+
+async function updateAntennaStatus(socket) {
+  try {
+    const status = await RB.getAntennaStatus();
+    socket.emit('status', status);
+  } catch (error) {
+    console.error('Error getting antenna status:', error);
+  }
+}
 
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  socket.emit('status', RB.getAntennaStatus());
+  updateAntennaStatus(socket);
 
   socket.on('set-antenna', (index, on) => {
-    RB.setRadio1Antenna(index + 1, on).then(() => {
-      const newStatus = RB.getAntennaStatus();
-      io.emit('status', newStatus);
-    });
+    RB.setRadio1Antenna(index + 1, on)
+      .then(() => {
+        updateAntennaStatus(io);
+      })
+      .catch((error) => {
+        console.error('Error setting antenna:', error);
+      });
   });
 
   socket.on('disconnect', () => {
     console.log('Client disconnected');
   });
-  
+
   socket.on('get-status', () => {
-    socket.emit('status', RB.getAntennaStatus());
+    updateAntennaStatus(socket);
   });
-  
 });
 
 server.listen(3001, () => {
