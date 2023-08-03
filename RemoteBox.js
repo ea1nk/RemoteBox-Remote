@@ -1,64 +1,99 @@
-const {SerialPort} = require('serialport');
-const {ReadlineParser} = require('@serialport/parser-readline');
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
 
 class RemoteBox {
   constructor(port, baudRate) {
-    this.port = new SerialPort({ path:port, baudRate: baudRate });
-    this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\n' }));
-    this.AntennaStatus = []
-  }
-
-  async sendCommand(command) {
-    const response = await this._writeAndRead(`${command}\r\n`);
-    return response.trim();
-  }
-
-  _writeAndRead(data) {
-    return new Promise((resolve, reject) => {
-      this.port.write(data, (err) => {
-        if (err) return reject(err);
-      });
-
-      this.parser.once('data', (data) => resolve(data));
+    this.port = new SerialPort({ path: port, baudRate: baudRate });
+    this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\r' }));
+    this.AntennaStatus = [];
+    this.port.on('error', (err) => {
+      console.log(err);
     });
   }
 
-  async getInfo() {
-    return await this.sendCommand('O');
+  sendCommand(command) {
+    const self = this;
+    console.log(`Voy a enviar el comando: ${command}`)
+    return new Promise(function (resolve, reject) {
+      self._writeAndRead(`${command}\n`)
+        .then((response) => resolve(response.trim()))
+        .catch((error) => reject(error));
+    });
   }
 
-  async getAntennaStatus() {
-    const response = await this.sendCommand('S');
-    this.AntennaStatus = this._parseAntennaStatus(response);
-    return this._parseAntennaStatus(response);
+  _writeAndRead(data) {
+    const self = this;
+    console.log("_write and read " + data);
+    return new Promise(function (resolve, reject) {
+      const dataListener = (responseData) => {
+        self.parser.removeListener('data', dataListener);
+        resolve(responseData);
+      };
+
+      self.parser.on('data', dataListener);
+
+      self.port.write(data, (err) => {
+        if (err) {
+          self.parser.removeListener('data', dataListener);
+          reject(err);
+        }
+      });
+    });
   }
 
-  async setDebugMessages(enabled) {
+  getInfo() {
+    return this.sendCommand('O');
+  }
+
+  getAntennaStatus() {
+    const self = this;
+    return new Promise(function (resolve, reject) {
+      self.sendCommand('S')
+        .then((response) => {
+          console.log(response)
+          self.AntennaStatus = self._parseAntennaStatus(response);
+          resolve(self._parseAntennaStatus(response));
+        })
+        .catch((error) => {
+          console.error('Error in getAntennaStatus:', error);
+          reject(error);
+        });
+    });
+  }
+
+  setDebugMessages(enabled) {
     const value = enabled ? 1 : 0;
-    return await this.sendCommand(`X${value}`);
+    return this.sendCommand(`X${value}`);
   }
 
-  async getAntennaInfo() {
-    return await this.sendCommand('FI');
+  getAntennaInfo() {
+    return this.sendCommand('FI');
   }
 
-  async setRadio1Antenna(n, on) {
+  setRadio1Antenna(n, on) {
     const value = on ? 1 : 0;
-    return await this.sendCommand(`1R${n}${value}`);
+    return this.sendCommand(`1R${n}${value}`);
   }
 
-  async setRadio2Antenna(n, on) {
+  setRadio2Antenna(n, on) {
     const value = on ? 1 : 0;
-    return await this.sendCommand(`2R${n}${value}`);
+    return this.sendCommand(`2R${n}${value}`);
   }
 
-  _parseAntennaStatus(response) {
-    const matches = response.match(/(SW\d+:|lSW:)(\d,?)+/);
-    if (!matches) throw new Error('Invalid antenna status message');
-
-    const statuses = matches[0].split(':')[1].split(',').map((s) => parseInt(s, 10));
+ _parseAntennaStatus(response) {
+  console.log(`Response ${response}`);
+  try {
+    const matches = response.match(/lSW\d+:<([\d,]+)>/);
+    console.log(matches)
+    if (!matches) {
+      throw new Error('Invalid antenna status message');
+    }
+    const statuses = matches[1].split(',').map((s) => parseInt(s, 10));
     return statuses;
+  } catch (error) {
+    throw new Error('Invalid antenna status message');
   }
+}
 }
 
 module.exports = RemoteBox;
