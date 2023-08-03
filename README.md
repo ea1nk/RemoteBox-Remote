@@ -5,7 +5,7 @@ Simple NodeJS class to switch antennas with a EA4TX's RemoteBox.
 
 Basic web interface is provided as sample.
 
-Reading antenna names, writing configuration and other functions are not supported yet.
+Reading antenna names, writing configuration and other functions are not supported.
 
 ### Installation:
 ```
