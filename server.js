@@ -1,6 +1,6 @@
 const RemoteBox = require('./RemoteBox');
 
-const RB = new RemoteBox('/dev/ttyACM0', 38400);
+const RB = new RemoteBox('/dev/ttyACM0', 38400); //Default RemoteBox 38400Bd
 const http = require('http');
 const socketIo = require('socket.io');
 
