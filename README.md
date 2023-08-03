@@ -34,5 +34,5 @@ Commands available:
   ```
    getAntennaStatus : Returns an array with the status of the antennas (1=ON, 0=OFF)
  
-   setAntenna(TRX,ANTENNA) :  Turns antenna ON for provided TX
+   setAntenna(TRX,ANTENNA) :  Turns antenna ON for provided TRX
 ```
