@@ -54,6 +54,6 @@
     }
 
     function setAntenna(idx) {
-        socket.emit('set-antenna', idx, 1);
+        socket.emit('set-antenna', 1, idx, 1); // trx, antenna, on. Defaults to trx1
     }
 </script>
