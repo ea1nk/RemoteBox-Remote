@@ -10,7 +10,7 @@ const io = socketIo(server);
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  socket.emit('status', controller.getAntennaStatus());
+  socket.emit('status', RB.getAntennaStatus());
 
   socket.on('set-antenna', (index, on) => {
     RB.setRadio1Antenna(index + 1, on).then(() => {
@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('get-status', () => {
-    socket.emit('status', controller.getAntennaStatus());
+    socket.emit('status', RB.getAntennaStatus());
   });
   
 });
