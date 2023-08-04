@@ -4,7 +4,9 @@
   "description": "EA4TX Remotebox Web Interface",
   "main": "server.js",
   "dependencies": {
-    "serialport": "^10.5.0"
+    "serialport": "^10.5.0",
+    "http": "^0.0.1-security",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {},
   "scripts": {
