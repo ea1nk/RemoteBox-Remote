@@ -1,4 +1,6 @@
 # RemoteBox
+
+[Leer en castellano](LEEME.md)
 ## EA4TX RemoteBox Web Interface & NodeJS Class
 
 Simple NodeJS class to switch antennas with a EA4TX's RemoteBox.
