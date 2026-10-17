@@ -14,7 +14,7 @@ const io = socketIo(server, {
 
 async function updateAntennaStatus(socket) {
   try {
-    const status = await RB.getAntennaStatus();
+    const status = await RB.getAllAntennaStatus(); // { 1: [...], 2: [...] }, one key per radio
     socket.emit('status', status);
   } catch (error) {
     console.error('Error getting antenna status:', error);
@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
   updateAntennaStatus(socket);
 
   socket.on('set-antenna', (trx, index, on) => {
-    
+    // trx: radio 1 or 2, index: antenna 0..7
     RB.setRadioAntenna(trx, index + 1, on)
       .then(() => {
         updateAntennaStatus(io);

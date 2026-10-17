@@ -13,14 +13,6 @@
     <div class="card m-2">
         <div class='card-body' id="antennas">
             <h5 class="card-title">RemoteBox</h5>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='1' id='ant1'>ANT-1</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn  btn-secondary" data-ant='2' id='ant2'>ANT-2</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='3' id='ant3'>ANT-3</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='4' id='ant4'>ANT-4</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='5' id='ant5'>ANT-5</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='6' id='ant6'>ANT-6</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='7' id='ant7'>ANT-7</button>
-            <button type="button" onclick=setAntenna(this.dataset.ant) class="btn btn-secondary" data-ant='8' id='ant8'>ANT-8</button>
         </div>
     </div>
 
@@ -43,17 +35,30 @@
     });
 
     socket.on('status', (data) => {
-        console.log('Received status from server:', data);
-        const activeAntenna = data.indexOf(1)
-        $(".btn").removeClass("btn-success").addClass("btn-secondary")
-        $(`button[data-ant=${activeAntenna+1}]`).removeClass("btn-secondary").addClass('btn-success');
+        // data = { 1: [bool x8], 2: [bool x8] }, one key per radio
+        const $box = $("#antennas")
+        Object.keys(data).forEach((radio) => {
+            let $row = $(`#radio${radio}`)
+            if (!$row.length) {
+                $row = $(`<div id="radio${radio}" class="mb-2"><div class="small text-muted">Radio ${radio}</div></div>`)
+                data[radio].forEach((_, i) => {
+                    $row.append(`<button type="button" class="btn btn-secondary me-1" data-radio="${radio}" data-ant="${i}">ANT-${i + 1}</button>`)
+                })
+                $box.append($row)
+            }
+            $row.find("button").each(function () {
+                const on = data[radio][this.dataset.ant]
+                $(this).toggleClass("btn-success", on).toggleClass("btn-secondary", !on)
+            })
+        })
     });
 
     function getStatus() {
         socket.emit('get-status');
     }
 
-    function setAntenna(idx) {
-        socket.emit('set-antenna', 1, idx, 1); // trx, antenna, on. Defaults to trx1
-    }
+    $(document).on("click", "#antennas button", function () {
+        // radio, antenna index (0..7), on
+        socket.emit('set-antenna', Number(this.dataset.radio), Number(this.dataset.ant), true)
+    })
 </script>
