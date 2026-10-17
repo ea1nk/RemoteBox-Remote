@@ -30,10 +30,11 @@ function App() {
   }, []);
 
   const handleButtonClick = (index) => {
-    const newStatus = [...status];
-    newStatus[index] = !newStatus[index];
-    setStatus(newStatus);
-    socket.emit('set-antenna', index, newStatus[index]);
+    // The RemoteBox selects one antenna per radio: turning one on turns the others off,
+    // and sending "off" has no effect. Radio 1 by default.
+    if (status[index]) return;
+    setStatus(status.map((_, i) => i === index));
+    socket.emit('set-antenna', 1, index, true); // trx, antenna index, on
   };
 
   return (
